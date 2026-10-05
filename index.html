@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính BMI, Calo (TDEE) & Gợi Ý Thực Đơn Khoa Học</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f0f2f5; color: #333; padding: 20px 10px; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { text-align: center; color: #2c3e50; font-size: 22px; margin-bottom: 20px; text-transform: uppercase; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #4a5568; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 15px; outline: none; }
+        input:focus, select:focus { border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49,130,206,0.2); }
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
+        button { width: 100%; padding: 14px; background: #319795; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        button:hover { background: #2c7a7b; }
+        #result-box { display: none; margin-top: 25px; padding-top: 20px; border-top: 2px dashed #e2e8f0; }
+        .card { background: #f7fafc; padding: 15px; border-radius: 10px; border-left: 4px solid #319795; margin-bottom: 15px; }
+        .card h3 { font-size: 16px; color: #2d3748; margin-bottom: 8px; }
+        .highlight { font-size: 22px; font-weight: bold; color: #dd6b20; }
+        .menu-list { background: #edf2f7; padding: 12px; border-radius: 8px; font-size: 14px; margin-top: 8px; line-height: 1.6; }
+        .affiliate-section { margin-top: 20px; background: #fffaf0; border: 1px solid #feebc8; padding: 15px; border-radius: 10px; }
+        .affiliate-section h4 { color: #c05621; margin-bottom: 10px; font-size: 15px; }
+        .product-btn { display: block; text-align: center; background: #ee4d2d; color: white; text-decoration: none; padding: 10px; border-radius: 6px; font-weight: bold; margin-top: 8px; font-size: 14px; }
+        .product-btn:hover { background: #d73211; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🔥 Tính BMI & Calo (TDEE)</h1>
+    
+    <div class="row">
+        <div class="col form-group">
+            <label>Giới tính</label>
+            <select id="gender">
+                <option value="male">Nam</option>
+                <option value="female">Nữ</option>
+            </select>
+        </div>
+        <div class="col form-group">
+            <label>Tuổi</label>
+            <input type="number" id="age" placeholder="Ví dụ: 25">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col form-group">
+            <label>Chiều cao (cm)</label>
+            <input type="number" id="height" placeholder="165">
+        </div>
+        <div class="col form-group">
+            <label>Cân nặng (kg)</label>
+            <input type="number" id="weight" placeholder="60">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Cường độ vận động</label>
+        <select id="activity">
+            <option value="1.2">Ít/Không vận động (Dân văn phòng)</option>
+            <option value="1.375">Vận động nhẹ (Tập 1-3 buổi/tuần)</option>
+            <option value="1.55">Vận động vừa (Tập 3-5 buổi/tuần)</option>
+            <option value="1.725">Vận động nặng (Tập 6-7 buổi/tuần)</option>
+        </select>
+    </div>
+
+    <button onclick="calculate()">TÍNH CHỈ SỐ & LẬP THỰC ĐƠN</button>
+
+    <div id="result-box">
+        <div class="card">
+            <h3>Chỉ số BMI của bạn: <span id="bmi-val" class="highlight">0</span></h3>
+            <p id="bmi-status" style="font-weight: bold;"></p>
+        </div>
+
+        <div class="card" style="border-left-color: #dd6b20;">
+            <h3>Lượng Calo tiêu thụ hàng ngày (TDEE):</h3>
+            <p><span id="tdee-val" class="highlight">0</span> kcal/ngày</p>
+            <small>*Đây là số calo duy trì cân nặng hiện tại.</small>
+        </div>
+
+        <div class="card" style="border-left-color: #3182ce;">
+            <h3>Gợi Ý Mục Tiêu Calo & Thực Đơn 1 Ngày:</h3>
+            <p id="goal-text" style="font-weight: bold; margin-bottom: 5px;"></p>
+            <div id="menu-suggestion" class="menu-list"></div>
+        </div>
+
+        <div class="affiliate-section">
+            <h4>🛒 Dụng cụ & Thực phẩm hỗ trợ đạt mục tiêu:</h4>
+            <p style="font-size: 13px; color: #742a2a;">Kiểm soát chính xác lượng calo và cân nặng tại nhà với giá ưu đãi:</p>
+            <a id="aff-btn-1" href="#" target="_blank" class="product-btn">👉 Mua Cân Sức Khỏe Điện Tử Tự Động (Shopee)</a>
+            <a id="aff-btn-2" href="#" target="_blank" class="product-btn" style="background: #38a169;">👉 Xem Thực Phẩm Yến Mạch/Eatclean Giảm Cân</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const AFFILIATE_ID = "17389390623";
+
+    function calculate() {
+        const gender = document.getElementById('gender').value;
+        const age = parseFloat(document.getElementById('age').value);
+        const height = parseFloat(document.getElementById('height').value);
+        const weight = parseFloat(document.getElementById('weight').value);
+        const activity = parseFloat(document.getElementById('activity').value);
+
+        if (!age || !height || !weight) {
+            alert("Vui lòng nhập đầy đủ thông tin!");
+            return;
+        }
+
+        // Tính BMI
+        const heightM = height / 100;
+        const bmi = (weight / (heightM * heightM)).toFixed(1);
+        document.getElementById('bmi-val').innerText = bmi;
+
+        let bmiStatus = "";
+        if (bmi < 18.5) bmiStatus = "Gầy (Cần tăng cân)";
+        else if (bmi < 24.9) bmiStatus = "Bình thường (Rất tốt)";
+        else if (bmi < 29.9) bmiStatus = "Thừa cân (Nên giảm cân)";
+        else bmiStatus = "Béo phì (Cần giảm cân ngay)";
+        document.getElementById('bmi-status').innerText = "Trạng thái: " + bmiStatus;
+
+        // Tính BMR (Công thức Mifflin-St Jeor)
+        let bmr = 0;
+        if (gender === 'male') {
+            bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+        } else {
+            bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+        }
+
+        // Tính TDEE
+        const tdee = Math.round(bmr * activity);
+        document.getElementById('tdee-val').innerText = tdee;
+
+        // Gợi ý mục tiêu & Thực đơn
+        let goalText = "";
+        let menuHTML = "";
+        
+        if (bmi >= 25) {
+            const loseWeightCal = tdee - 500;
+            goalText = `Mục tiêu GIẢM CÂN: Ăn khoảng ${loseWeightCal} kcal/ngày.`;
+            menuHTML = `
+                <b>Sáng:</b> 1 củ khoai lang luộc + 1 quả trứng luộc + 1 ly cà phê đen không đường.<br>
+                <b>Trưa:</b> 150g ức gà áp chảo + 1 bát cơm lứt + Nhiều rau luộc.<br>
+                <b>Tối:</b> 150g cá hấp + 1 đĩa salad xà lách dưa chuột (Sốt ít béo).
+            `;
+        } else if (bmi < 18.5) {
+            const gainWeightCal = tdee + 400;
+            goalText = `Mục tiêu TĂNG CÂN: Ăn khoảng ${gainWeightCal} kcal/ngày.`;
+            menuHTML = `
+                <b>Sáng:</b> 1 tô phở bò/hủ tiếu + 1 ly sữa tươi nguyên kem.<br>
+                <b>Phụ sáng:</b> 1 quả chuối + 1 nắm hạt chuồng/hạnh nhân.<br>
+                <b>Trưa:</b> 2 chén cơm + 150g thịt kho trứng + Canh canh xào.<br>
+                <b>Tối:</b> 2 chén cơm + 150g cá hồi hoặc thịt lợn áp chảo + Bát canh đạm.
+            `;
+        } else {
+            goalText = `Mục tiêu DUY TRÌ BẢO TOÀN VÓC DÁNG: Ăn khoảng ${tdee} kcal/ngày.`;
+            menuHTML = `
+                <b>Sáng:</b> 2 lát bánh mì đen + 2 quả trứng ốp la + 1 quả táo.<br>
+                <b>Trưa:</b> 1.5 chén cơm + 150g thịt/cá + Bát canh rau xanh.<br>
+                <b>Tối:</b> 1 chén cơm + 150g đậu phụ/thịt nạc + Đĩa rau củ luộc.
+            `;
+        }
+
+        document.getElementById('goal-text').innerText = goalText;
+        document.getElementById('menu-suggestion').innerHTML = menuHTML;
+
+        // Gắn Link Shopee Affiliate
+        const baseShopeeSearch = "https://shopee.vn/search?keyword=";
+        document.getElementById('aff-btn-1').href = baseShopeeSearch + encodeURIComponent("cân sức khỏe điện tử") + "&smtt=" + AFFILIATE_ID;
+        document.getElementById('aff-btn-2').href = baseShopeeSearch + encodeURIComponent("yến mạch ăn kiêng giảm cân") + "&smtt=" + AFFILIATE_ID;
+
+        // Hiện kết quả
+        document.getElementById('result-box').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
